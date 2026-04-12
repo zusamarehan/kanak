@@ -58,13 +58,26 @@
             z-index: 1;
         }
 
-        /* Navigation */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         nav {
             display: flex;
             gap: 2rem;
-            margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--border-glow);
-            padding-bottom: 1rem;
         }
 
         nav a {
@@ -76,6 +89,7 @@
             letter-spacing: 0.05em;
             transition: all 0.3s;
             position: relative;
+            padding-bottom: 1rem;
         }
 
         nav a.active {
@@ -85,7 +99,7 @@
         nav a.active::after {
             content: '';
             position: absolute;
-            bottom: -1rem;
+            bottom: -1px;
             left: 0;
             width: 100%;
             height: 2px;
@@ -301,11 +315,14 @@
     <div class="ambient-glow"></div>
     
     <div class="container">
-        <nav>
-            <a href="/overview" class="active">Financial Overview</a>
-            <a href="/dashboard">Donors</a>
-            <a href="/disbursements">Recipients</a>
-        </nav>
+        <div class="top-bar">
+            <div class="brand">Kanak Foundation</div>
+            <nav>
+                <a href="/overview" class="active">Financial Overview</a>
+                <a href="/dashboard">Donors</a>
+                <a href="/disbursements">Disbursements</a>
+            </nav>
+        </div>
 
         <header>
             <div class="header-left">
