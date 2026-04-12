@@ -20,3 +20,4 @@ Route::get('/donors/{id}/ledger', [DonorLedgerController::class, 'show']);
 Route::get('/disbursement-stats', [DisbursementStatsController::class, 'index']);
 Route::get('/recipients', [RecipientListController::class, 'index']);
 Route::get('/recipients/{id}/ledger', [RecipientLedgerController::class, 'show']);
+Route::get('/overview', [\App\Http\Controllers\Api\OverviewController::class, 'index']);

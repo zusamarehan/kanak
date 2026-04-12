@@ -13,3 +13,5 @@ Route::get('/dashboard', function () {
 Route::get('/disbursements', function () {
     return view('disbursements-dashboard');
 });
+
+Route::get('/overview', [\App\Http\Controllers\Api\OverviewController::class, 'show']);
