@@ -16,28 +16,53 @@ class DonorLedgerController extends Controller
             return response()->json(['success' => false, 'message' => 'Donor not found'], 404);
         }
 
+        // 1. Fetch Normal Donations
         $donations = DB::table('donations')
             ->where('donor_id', $id)
             ->where('amount', '>', 0)
             ->select('id', 'amount', 'month', 'year', 'created_at')
-            ->orderByDesc('year')
-            ->orderByDesc('month')
-            ->orderByDesc('created_at')
             ->get()
             ->map(function($item) {
-                // Formatting for the UI - since we only have month/year, we'll use that as the reference date
-                $item->date = "{$item->year}-" . str_pad($item->month, 2, '0', STR_PAD_LEFT) . "-01";
-                $item->type = 'credit'; // Foundation perspective: Credit (money in)
-                $item->description = "Donation for {$item->month}/{$item->year}";
-                return $item;
+                return [
+                    'id' => $item->id,
+                    'amount' => (float) $item->amount,
+                    'type' => 'Donation',
+                    'date' => "{$item->year}-" . str_pad($item->month, 2, '0', STR_PAD_LEFT) . "-01",
+                    'description' => "Contribution",
+                    'raw_date' => $item->created_at
+                ];
             });
+
+        // 2. Fetch Zakat Collections
+        $zakat = DB::table('zakat_collections')
+            ->where('donor_id', $id)
+            ->where('amount', '>', 0)
+            ->select('id', 'amount', 'collected_on', 'created_at')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'amount' => (float) $item->amount,
+                    'type' => 'Zakat',
+                    'date' => $item->collected_on,
+                    'description' => "Zakat Collection",
+                    'raw_date' => $item->created_at
+                ];
+            });
+
+        // 3. Combine and Sort (Most recent first)
+        $ledger = $donations->concat($zakat)
+            ->sortByDesc(function($item) {
+                return $item['date'] . $item['raw_date'];
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
             'data' => [
                 'donor' => $donor,
-                'ledger' => $donations,
-                'total_contributed' => $donations->sum('amount')
+                'ledger' => $ledger,
+                'total_contributed' => $ledger->sum('amount')
             ]
         ]);
     }

@@ -250,6 +250,33 @@
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             animation: fadeUp 0.6s ease forwards;
+            margin-bottom: 3rem;
+        }
+
+        .zakat-container {
+            border-color: rgba(255, 215, 0, 0.2);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 215, 0, 0.02) 100%);
+        }
+
+        .zakat-badge {
+            background: rgba(255, 215, 0, 0.1);
+            color: #ffd700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .zakat-pill {
+            background: rgba(255, 215, 0, 0.1);
+            color: #ffd700;
+            border-color: rgba(255, 215, 0, 0.2);
+        }
+
+        .zakat-avatar {
+            background: linear-gradient(135deg, #ffd700, #b8860b);
         }
 
         .table-header {
@@ -480,13 +507,21 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon icon-money">$</div>
-                <div class="stat-title">Total Collected Amount</div>
+                <div class="stat-title">Total Normal Collection</div>
                 <div class="stat-value" id="val-amount"><div class="skeleton"></div></div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-money" style="background: rgba(255, 215, 0, 0.1); color: #ffd700;">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path></svg>
+                </div>
+                <div class="stat-title">Total Zakat Collection</div>
+                <div class="stat-value" id="val-zakat" style="color: #ffd700;"><div class="skeleton"></div></div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-icon icon-donations">#</div>
-                <div class="stat-title">Total Donations</div>
+                <div class="stat-title">All Transactions</div>
                 <div class="stat-value" id="val-donations"><div class="skeleton"></div></div>
             </div>
 
@@ -499,10 +534,10 @@
             </div>
         </div>
 
-        <!-- Table -->
+        <!-- Tables Section -->
         <div class="table-container">
             <div class="table-header">
-                <h2>Donor Roster</h2>
+                <h2>Donation Roster</h2>
             </div>
             <table>
                 <thead>
@@ -514,10 +549,26 @@
                     </tr>
                 </thead>
                 <tbody id="donor-tbody">
-                    <!-- Javascript will populate rows here -->
+                    <tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container zakat-container">
+            <div class="table-header">
+                <h2>Zakat Collection Roster <span class="zakat-badge">Zakat Only</span></h2>
+            </div>
+            <table>
+                <thead>
                     <tr>
-                        <td colspan="4"><div class="skeleton" style="width: 100%"></div></td>
+                        <th>Donor</th>
+                        <th>Collections Made</th>
+                        <th>Total Contributed</th>
+                        <th style="text-align: right;">Action</th>
                     </tr>
+                </thead>
+                <tbody id="zakat-tbody">
+                    <tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>
                 </tbody>
             </table>
         </div>
@@ -609,9 +660,12 @@
 
             // Show Loading state
             document.getElementById('val-amount').innerHTML = '<div class="skeleton"></div>';
+            document.getElementById('val-zakat').innerHTML = '<div class="skeleton"></div>';
             document.getElementById('val-donations').innerHTML = '<div class="skeleton"></div>';
             document.getElementById('val-donors').innerHTML = '<div class="skeleton"></div>';
+            
             document.getElementById('donor-tbody').innerHTML = '<tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>';
+            document.getElementById('zakat-tbody').innerHTML = '<tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>';
 
             const params = new URLSearchParams();
             if (startDate) params.append('start_date', startDate);
@@ -630,62 +684,79 @@
 
                 if (statsData.success) {
                     const elAmount = document.getElementById('val-amount');
+                    const elZakat = document.getElementById('val-zakat');
                     const elDonations = document.getElementById('val-donations');
                     const elDonors = document.getElementById('val-donors');
                     
                     animateValue(elAmount, 0, statsData.data.total_collected_amount, 1500, true);
-                    animateValue(elDonations, 0, statsData.data.total_donations_count, 1500, false);
-                    animateValue(elDonors, 0, statsData.data.total_donors_count, 1500, false);
+                    animateValue(elZakat, 0, statsData.data.total_zakat_amount, 1500, true);
+                    animateValue(elDonations, 0, statsData.data.total_donations_count + statsData.data.total_zakat_count, 1500, false);
+                    animateValue(elDonors, 0, statsData.data.total_unique_donors_count, 1500, false);
                 }
 
                 if (donorsData.success) {
-                    const tbody = document.getElementById('donor-tbody');
-                    const rows = donorsData.data;
-
-                    if (rows.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">No donors found for this period.</div></td></tr>`;
-                        return;
-                    }
-
-                    let sumDonations = 0;
-                    let sumAmount = 0;
-
-                    const rowsHtml = rows.map(donor => {
-                        const initials = (donor.name || 'A').substring(0, 2).toUpperCase();
-                        sumDonations += parseInt(donor.total_donations_count || 0);
-                        sumAmount += parseFloat(donor.total_donated_amount || 0);
+                    const populateRoster = (elementId, data, category) => {
+                        const tbody = document.getElementById(elementId);
+                        const isZakat = category === 'zakat';
                         
-                        return `
-                        <tr>
-                            <td>
-                                <div class="donor-avatar">${initials}</div>
-                                <strong>${donor.name || 'Anonymous User'}</strong>
-                            </td>
-                            <td>
-                                <span style="opacity: 0.8">${donor.total_donations_count} donations</span>
-                            </td>
-                            <td>
-                                <span class="amount-pill">${formatter.format(donor.total_donated_amount)}</span>
-                            </td>
-                            <td style="text-align: right;">
-                                <button class="view-btn" style="margin-left: auto;" onclick="openLedger(${donor.id}, '${donor.name.replace(/'/g, "\\'")}')" title="View Donation Ledger">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                                </button>
-                            </td>
-                        </tr>
+                        if (!data || data.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">No records found.</div></td></tr>`;
+                            return;
+                        }
+
+                        let sumCount = 0;
+                        let sumAmount = 0;
+
+                        let avatarClass = 'donor-avatar';
+                        let pillClass = 'amount-pill';
+                        if (isZakat) {
+                            avatarClass += ' zakat-avatar';
+                            pillClass += ' zakat-pill';
+                        }
+
+                        const rowsHtml = data.map(donor => {
+                            const donorName = donor.name || 'Anonymous User';
+                            const initials = donorName.substring(0, 2).toUpperCase();
+                            const escapedName = donorName.replace(/'/g, "\\'");
+                            
+                            sumCount += parseInt(donor.total_count || 0);
+                            sumAmount += parseFloat(donor.total_amount || 0);
+                            
+                            return `
+                            <tr>
+                                <td>
+                                    <div class="${avatarClass}">${initials}</div>
+                                    <strong>${donorName}</strong>
+                                </td>
+                                <td>
+                                    <span style="opacity: 0.8">${donor.total_count} ${isZakat ? 'records' : 'donations'}</span>
+                                </td>
+                                <td>
+                                    <span class="${pillClass}">${formatter.format(donor.total_amount)}</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <button class="view-btn" style="margin-left: auto;" onclick="openLedger(${donor.id}, '${escapedName}')" title="View Transaction History">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            `;
+                        }).join('');
+
+                        const footerHtml = `
+                            <tr class="total-row">
+                                <td style="text-align: right; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Totals</td>
+                                <td style="font-weight: 700;">${sumCount} ${isZakat ? 'records' : 'donations'}</td>
+                                <td><span class="${pillClass}" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.1); font-weight: 700;">${formatter.format(sumAmount)}</span></td>
+                                <td></td>
+                            </tr>
                         `;
-                    }).join('');
 
-                    const footerHtml = `
-                        <tr class="total-row">
-                            <td style="text-align: right; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Totals</td>
-                            <td style="font-weight: 700;">${sumDonations} donations</td>
-                            <td><span class="amount-pill" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.1); font-weight: 700;">${formatter.format(sumAmount)}</span></td>
-                            <td></td>
-                        </tr>
-                    `;
+                        tbody.innerHTML = rowsHtml + footerHtml;
+                    };
 
-                    tbody.innerHTML = rowsHtml + footerHtml;
+                    populateRoster('donor-tbody', donorsData.data.normal, 'normal');
+                    populateRoster('zakat-tbody', donorsData.data.zakat, 'zakat');
                 }
             } catch (err) {
                 console.error('Failed to fetch dashboard data', err);
@@ -726,16 +797,23 @@
                         let balance = 0;
                         for(let i=0; i<=reversedIndex; i++) balance += parseFloat(ledgerData[i].amount);
 
-                        const date = new Date(item.date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+                        const dateStr = item.date;
+                        const date = new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                        const isZakat = item.type === 'Zakat';
+                        const typeColor = isZakat ? '#ffd700' : 'var(--text-muted)';
+                        const amountColor = isZakat ? '#ffd700' : 'var(--accent-glow)';
                         
                         return `
                             <tr>
-                                <td><span style="opacity: 0.7; font-size: 0.8rem;">${date}</span></td>
                                 <td>
-                                    <div style="font-weight: 500; font-size: 0.85rem;">Contribution</div>
-                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Donation for Period</div>
+                                    <div style="font-size: 0.85rem; font-weight: 500;">${date}</div>
+                                    <div style="font-size: 0.7rem; color: ${typeColor};">${item.type}</div>
                                 </td>
-                                <td style="text-align: right;"><span class="credit-text">+ ${formatter.format(item.amount)}</span></td>
+                                <td>
+                                    <div style="font-weight: 500; font-size: 0.85rem;">${item.description}</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">${isZakat ? 'Direct Collection' : 'Monthly Contribution'}</div>
+                                </td>
+                                <td style="text-align: right;"><span style="color: ${amountColor}; font-weight: 600;">+ ${formatter.format(item.amount)}</span></td>
                                 <td style="text-align: right; font-weight: 700;">${formatter.format(balance)}</td>
                             </tr>
                         `;
