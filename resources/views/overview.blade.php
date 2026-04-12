@@ -302,21 +302,15 @@
     
     <div class="container">
         <nav>
+            <a href="/overview" class="active">Financial Overview</a>
             <a href="/dashboard">Donors</a>
             <a href="/disbursements">Recipients</a>
-            <a href="/overview" class="active">Financial Overview</a>
         </nav>
 
         <header>
             <div class="header-left">
                 <h1>Strategic Overview</h1>
                 <p>Global financial position and recovery status.</p>
-            </div>
-            <div class="filter-group">
-                <div class="date-picker-wrapper">
-                    <label>Analysis Period</label>
-                    <input type="text" id="date-range" placeholder="Select Date Range">
-                </div>
             </div>
         </header>
 
@@ -428,23 +422,7 @@
             window.requestAnimationFrame(step);
         }
 
-        let fp;
-        
         async function fetchData() {
-            let startDate = '';
-            let endDate = '';
-
-            if (fp && fp.selectedDates.length === 2) {
-                startDate = fp.formatDate(fp.selectedDates[0], "Y-m-d");
-                endDate = fp.formatDate(fp.selectedDates[1], "Y-m-d");
-            }
-
-            const params = new URLSearchParams();
-            if (startDate) params.append('start_date', startDate);
-            if (endDate) params.append('end_date', endDate);
-            
-            const queryString = params.toString() ? '?' + params.toString() : '';
-
             // Set loading skeletons
             const targets = [
                 'val-net-balance', 'val-total-in', 'val-total-out',
@@ -457,7 +435,7 @@
             });
 
             try {
-                const response = await fetch('/api/overview' + queryString);
+                const response = await fetch('/api/overview');
                 const result = await response.json();
 
                 if (result.success) {
@@ -498,20 +476,8 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fp = flatpickr("#date-range", {
-                mode: "range",
-                dateFormat: "Y-m-d",
-                theme: "dark",
-                onChange: function(selectedDates) {
-                    if (selectedDates.length === 2) {
-                        fetchData();
-                    }
-                }
-            });
-
-            fetchData();
-        });
+        document.addEventListener('DOMContentLoaded', fetchData);
     </script>
+
 </body>
 </html>
