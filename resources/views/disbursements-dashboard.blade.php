@@ -326,6 +326,13 @@
             border-bottom: none;
         }
 
+        .total-row td {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 1.25rem 1.5rem !important;
+            font-weight: 600;
+        }
+
         .recipient-avatar {
             width: 32px;
             height: 32px;
@@ -680,8 +687,13 @@
                             return;
                         }
 
-                        tbody.innerHTML = data.map(recipient => {
+                        let totalGot = 0;
+                        let totalRepaid = 0;
+                        let totalOutstanding = 0;
+
+                        const rowsHtml = data.map(recipient => {
                             const initials = (recipient.name || 'R').substring(0, 2).toUpperCase();
+                            totalGot += parseFloat(recipient.total_disbursed_amount || 0);
                             
                             let avatarClass = 'recipient-avatar';
                             let pillClass = 'amount-pill';
@@ -696,6 +708,9 @@
                             
                             let extraRows = '';
                             if (isNormal) {
+                                totalRepaid += parseFloat(recipient.total_repaid_amount || 0);
+                                totalOutstanding += parseFloat(recipient.outstanding_amount || 0);
+                                
                                 const balanceClass = recipient.outstanding_amount > 0 ? 'outstanding-pill' : 'cleared-pill';
                                 extraRows = `
                                     <td><span style="opacity: 0.8; font-size: 0.9rem;">${formatter.format(recipient.total_repaid_amount || 0)}</span></td>
@@ -716,6 +731,20 @@
                             </tr>
                             `;
                         }).join('');
+
+                        // Append Total Row
+                        const footerHtml = `
+                            <tr class="total-row">
+                                <td colspan="3" style="text-align: right; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Total</td>
+                                <td><span class="amount-pill" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.1);">${formatter.format(totalGot)}</span></td>
+                                ${isNormal ? `
+                                    <td><span style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">${formatter.format(totalRepaid)}</span></td>
+                                    <td><span class="amount-pill ${totalOutstanding > 0 ? 'outstanding-pill' : 'cleared-pill'}" style="font-weight: 700;">${formatter.format(totalOutstanding)}</span></td>
+                                ` : ''}
+                            </tr>
+                        `;
+                        
+                        tbody.innerHTML = rowsHtml + footerHtml;
                     };
 
                     populateTable('normal-tbody', recipientsData.data.normal, 'normal');
