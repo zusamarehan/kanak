@@ -299,6 +299,110 @@
             border-bottom: none;
         }
 
+        .total-row td {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 1.25rem 2rem !important;
+            font-weight: 600;
+        }
+
+        /* Drawer Styles */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: #0d0d12;
+            border-left: 1px solid var(--border-glow);
+            z-index: 1001;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+        }
+
+        .drawer.active {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ledger-table th {
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ledger-table td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-size: 0.85rem;
+        }
+
+        .credit-text { color: #34d399; font-weight: 600; }
+        .debit-text { color: #f87171; font-weight: 600; }
+
+        .view-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 0.4rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-glow);
+        }
+
         .donor-avatar {
             width: 36px;
             height: 36px;
@@ -406,27 +510,55 @@
                         <th>Donor</th>
                         <th>Donations Made</th>
                         <th>Total Contributed</th>
+                        <th style="text-align: right;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="donor-tbody">
                     <!-- Javascript will populate rows here -->
                     <tr>
-                        <td colspan="3"><div class="skeleton" style="width: 100%"></div></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3"><div class="skeleton" style="width: 100%"></div></td>
+                        <td colspan="4"><div class="skeleton" style="width: 100%"></div></td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
+    <!-- Ledger Drawer -->
+    <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+    <div id="drawer" class="drawer">
+        <div class="drawer-header">
+            <div>
+                <h2 id="drawer-title" style="font-size: 1.5rem; font-weight: 600;">Donor Ledger</h2>
+                <p id="drawer-subtitle" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Donation History</p>
+            </div>
+            <button onclick="closeDrawer()" style="background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; box-shadow: none; padding: 0; height: auto;">&times;</button>
+        </div>
+        <div class="drawer-content">
+            <div id="ledger-loading" class="skeleton" style="height: 200px; display: none; margin-bottom: 2rem;"></div>
+            <div id="ledger-container">
+                <table class="ledger-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th style="text-align: right;">Amount</th>
+                            <th style="text-align: right;">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledger-tbody">
+                        <!-- Transactions will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Formatter for currency
-        const formatter = new Intl.NumberFormat('en-US', {
+        const formatter = new Intl.NumberFormat('en-IN', {
             style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2
+            currency: 'INR',
+            minimumFractionDigits: 0
         });
 
         let fp;
@@ -439,7 +571,6 @@
                 altInput: true,
                 altFormat: "F j, Y",
                 onClose: function(selectedDates, dateStr, instance) {
-                    // Optional: auto-fetch on close if both dates selected
                     if (selectedDates.length === 2) {
                         fetchData();
                     }
@@ -454,8 +585,6 @@
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                
-                // easeOutExpo algorithm
                 const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
                 const currentVal = start + (end - start) * easeOut;
                 
@@ -482,9 +611,8 @@
             document.getElementById('val-amount').innerHTML = '<div class="skeleton"></div>';
             document.getElementById('val-donations').innerHTML = '<div class="skeleton"></div>';
             document.getElementById('val-donors').innerHTML = '<div class="skeleton"></div>';
-            document.getElementById('donor-tbody').innerHTML = '<tr><td colspan="3"><div class="skeleton" style="width: 100%"></div></td></tr>';
+            document.getElementById('donor-tbody').innerHTML = '<tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>';
 
-            // Build query params
             const params = new URLSearchParams();
             if (startDate) params.append('start_date', startDate);
             if (endDate) params.append('end_date', endDate);
@@ -492,7 +620,6 @@
             const queryString = params.toString() ? '?' + params.toString() : '';
 
             try {
-                // Fetch perfectly in parallel
                 const [statsRes, donorsRes] = await Promise.all([
                     fetch('/api/donation-stats' + queryString),
                     fetch('/api/donors' + queryString)
@@ -516,13 +643,17 @@
                     const rows = donorsData.data;
 
                     if (rows.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state">No donors found for this period.</div></td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">No donors found for this period.</div></td></tr>`;
                         return;
                     }
 
-                    tbody.innerHTML = rows.map(donor => {
-                        // Generate Initials
+                    let sumDonations = 0;
+                    let sumAmount = 0;
+
+                    const rowsHtml = rows.map(donor => {
                         const initials = (donor.name || 'A').substring(0, 2).toUpperCase();
+                        sumDonations += parseInt(donor.total_donations_count || 0);
+                        sumAmount += parseFloat(donor.total_donated_amount || 0);
                         
                         return `
                         <tr>
@@ -536,14 +667,93 @@
                             <td>
                                 <span class="amount-pill">${formatter.format(donor.total_donated_amount)}</span>
                             </td>
+                            <td style="text-align: right;">
+                                <button class="view-btn" style="margin-left: auto;" onclick="openLedger(${donor.id}, '${donor.name.replace(/'/g, "\\'")}')" title="View Donation Ledger">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                </button>
+                            </td>
                         </tr>
+                        `;
+                    }).join('');
+
+                    const footerHtml = `
+                        <tr class="total-row">
+                            <td style="text-align: right; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Totals</td>
+                            <td style="font-weight: 700;">${sumDonations} donations</td>
+                            <td><span class="amount-pill" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.1); font-weight: 700;">${formatter.format(sumAmount)}</span></td>
+                            <td></td>
+                        </tr>
+                    `;
+
+                    tbody.innerHTML = rowsHtml + footerHtml;
+                }
+            } catch (err) {
+                console.error('Failed to fetch dashboard data', err);
+            }
+        }
+
+        async function openLedger(id, name) {
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            const tbody = document.getElementById('ledger-tbody');
+            const loading = document.getElementById('ledger-loading');
+            const container = document.getElementById('ledger-container');
+            const title = document.getElementById('drawer-title');
+
+            title.innerText = name;
+            tbody.innerHTML = '';
+            loading.style.display = 'block';
+            container.style.display = 'none';
+            
+            drawer.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const res = await fetch(`/api/donors/${id}/ledger`);
+                const data = await res.json();
+
+                if (data.success) {
+                    let runningBalance = 0;
+                    // Sort by year/month ascending for running balance calculation if needed, 
+                    // but usually donors just want to see a list.
+                    // Let's calculate running balance from oldest to newest.
+                    const ledgerData = [...data.data.ledger].reverse();
+
+                    tbody.innerHTML = data.data.ledger.map((item, index) => {
+                        // For the UI, we'll calculate running balance in reverse for the display if it's Desc
+                        const reversedIndex = data.data.ledger.length - 1 - index;
+                        let balance = 0;
+                        for(let i=0; i<=reversedIndex; i++) balance += parseFloat(ledgerData[i].amount);
+
+                        const date = new Date(item.date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+                        
+                        return `
+                            <tr>
+                                <td><span style="opacity: 0.7; font-size: 0.8rem;">${date}</span></td>
+                                <td>
+                                    <div style="font-weight: 500; font-size: 0.85rem;">Contribution</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">Donation for Period</div>
+                                </td>
+                                <td style="text-align: right;"><span class="credit-text">+ ${formatter.format(item.amount)}</span></td>
+                                <td style="text-align: right; font-weight: 700;">${formatter.format(balance)}</td>
+                            </tr>
                         `;
                     }).join('');
                 }
             } catch (err) {
-                console.error('Failed to fetch dashboard data', err);
-                alert("There was an error pulling the dashboard metrics.");
+                console.error('Failed to fetch ledger', err);
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Error loading history.</td></tr>';
+            } finally {
+                loading.style.display = 'none';
+                container.style.display = 'block';
             }
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawer').classList.remove('active');
+            document.getElementById('drawer-overlay').classList.remove('active');
+            document.body.style.overflow = '';
         }
     </script>
 </body>
