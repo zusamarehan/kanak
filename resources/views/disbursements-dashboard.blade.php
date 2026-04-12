@@ -333,6 +333,103 @@
             font-weight: 600;
         }
 
+        /* Drawer Styles */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 600px;
+            height: 100vh;
+            background: #0d0d12;
+            border-left: 1px solid var(--border-glow);
+            z-index: 1001;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+        }
+
+        .drawer.active {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ledger-table th {
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ledger-table td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-size: 0.85rem;
+        }
+
+        .debit-text { color: #f87171; font-weight: 600; }
+        .credit-text { color: #34d399; font-weight: 600; }
+
+        .view-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 0.4rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-glow);
+        }
+
         .recipient-avatar {
             width: 32px;
             height: 32px;
@@ -529,10 +626,11 @@
                             <th>Total Got</th>
                             <th>Repaid</th>
                             <th>Outstanding</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="normal-tbody">
-                        <tr><td colspan="6"><div class="skeleton" style="width: 100%"></div></td></tr>
+                        <tr><td colspan="7"><div class="skeleton" style="width: 100%"></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -573,6 +671,37 @@
                     </thead>
                     <tbody id="grant-tbody">
                         <tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ledger Drawer -->
+    <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+    <div id="drawer" class="drawer">
+        <div class="drawer-header">
+            <div>
+                <h2 id="drawer-title" style="font-size: 1.5rem; font-weight: 600;">Recipient Ledger</h2>
+                <p id="drawer-subtitle" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Transaction History</p>
+            </div>
+            <button onclick="closeDrawer()" style="background: transparent; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; box-shadow: none; padding: 0; height: auto;">&times;</button>
+        </div>
+        <div class="drawer-content">
+            <div id="ledger-loading" class="skeleton" style="height: 200px; display: none; margin-bottom: 2rem;"></div>
+            <div id="ledger-container">
+                <table class="ledger-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th style="text-align: right;">Debit (Out)</th>
+                            <th style="text-align: right;">Credit (In)</th>
+                            <th style="text-align: right;">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledger-tbody">
+                        <!-- Transactions will be loaded here -->
                     </tbody>
                 </table>
             </div>
@@ -680,7 +809,7 @@
                     const populateTable = (elementId, data, category) => {
                         const tbody = document.getElementById(elementId);
                         const isNormal = category === 'normal';
-                        const colCount = isNormal ? 6 : 4;
+                        const colCount = isNormal ? 7 : 4;
                         
                         if (data.length === 0) {
                             tbody.innerHTML = `<tr><td colspan="${colCount}"><div class="empty-state">No recipients found.</div></td></tr>`;
@@ -715,6 +844,11 @@
                                 extraRows = `
                                     <td><span style="opacity: 0.8; font-size: 0.9rem;">${formatter.format(recipient.total_repaid_amount || 0)}</span></td>
                                     <td><span class="amount-pill ${balanceClass}">${formatter.format(recipient.outstanding_amount || 0)}</span></td>
+                                    <td>
+                                        <button class="view-btn" onclick="openLedger(${recipient.id}, '${recipient.name.replace(/'/g, "\\'")}')" title="View Transaction Ledger">
+                                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                        </button>
+                                    </td>
                                 `;
                             }
                             
@@ -740,6 +874,7 @@
                                 ${isNormal ? `
                                     <td><span style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);">${formatter.format(totalRepaid)}</span></td>
                                     <td><span class="amount-pill ${totalOutstanding > 0 ? 'outstanding-pill' : 'cleared-pill'}" style="font-weight: 700;">${formatter.format(totalOutstanding)}</span></td>
+                                    <td></td>
                                 ` : ''}
                             </tr>
                         `;
@@ -754,6 +889,92 @@
             } catch (err) {
                 console.error('Failed to fetch dashboard data', err);
             }
+        }
+
+        async function openLedger(id, name) {
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            const tbody = document.getElementById('ledger-tbody');
+            const loading = document.getElementById('ledger-loading');
+            const container = document.getElementById('ledger-container');
+            const title = document.getElementById('drawer-title');
+
+            title.innerText = name;
+            tbody.innerHTML = '';
+            loading.style.display = 'block';
+            container.style.display = 'none';
+            
+            drawer.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const res = await fetch(`/api/recipients/${id}/ledger`);
+                const data = await res.json();
+
+                if (data.success) {
+                    tbody.innerHTML = data.data.ledger.map(item => {
+                        const date = new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                        const year = new Date(item.date).getFullYear();
+                        
+                        const isDebit = item.type === 'debit';
+                        const amountFormatted = formatter.format(item.amount);
+                        
+                        const debitHtml = isDebit ? `
+                            <div class="debit-text" style="display: flex; align-items: center; gap: 4px;">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                ${amountFormatted}
+                            </div>
+                        ` : `<span style="opacity: 0.1;">—</span>`;
+
+                        const creditHtml = !isDebit ? `
+                            <div class="credit-text" style="display: flex; align-items: center; gap: 4px;">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                                ${amountFormatted}
+                            </div>
+                        ` : `<span style="opacity: 0.1;">—</span>`;
+
+                        const balanceClass = item.running_balance > 0 ? 'debit-text' : 'credit-text';
+                        
+                        return `
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 500; font-size: 0.9rem;">${date}</div>
+                                    <div style="font-size: 0.7rem; opacity: 0.5;">${year}</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 500; color: var(--text-main); font-size: 0.85rem;">${isDebit ? 'Disbursement' : 'Repayment'}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.notes || 'No notes'}">
+                                        ${item.notes || 'No notes'}
+                                    </div>
+                                </td>
+                                <td style="text-align: right;">${debitHtml}</td>
+                                <td style="text-align: right;">${creditHtml}</td>
+                                <td style="text-align: right;">
+                                    <div class="${balanceClass}" style="font-weight: 700; font-size: 0.9rem;">
+                                        ${formatter.format(Math.abs(item.running_balance))}
+                                        <div style="font-size: 0.6rem; font-weight: 400; opacity: 0.6; margin-top: 2px;">
+                                            ${item.running_balance > 0 ? 'DUE' : 'OVERPAID'}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Failed to fetch ledger', err);
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Error loading ledger.</td></tr>';
+            } finally {
+                loading.style.display = 'none';
+                container.style.display = 'block';
+            }
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawer').classList.remove('active');
+            document.getElementById('drawer-overlay').classList.remove('active');
+            document.body.style.overflow = '';
         }
     </script>
 </body>
