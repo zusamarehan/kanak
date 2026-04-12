@@ -61,7 +61,7 @@
         .top-bar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
             margin-bottom: 2.5rem;
             border-bottom: 1px solid var(--border-glow);
         }
@@ -73,6 +73,8 @@
             background: linear-gradient(to right, #fff, var(--accent-primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            padding-bottom: 1rem;
+            line-height: 1;
         }
 
         nav {
@@ -90,6 +92,7 @@
             transition: all 0.3s;
             position: relative;
             padding-bottom: 1rem;
+            line-height: 1;
         }
 
         nav a.active {
