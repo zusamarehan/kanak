@@ -934,8 +934,12 @@
                             </div>
                         ` : `<span style="opacity: 0.1;">—</span>`;
 
-                        const balanceClass = item.running_balance > 0 ? 'debit-text' : 'credit-text';
-                        
+                        const balanceClass = item.running_balance > 0 ? 'debit-text' : (item.running_balance < 0 ? 'credit-text' : '');
+                        let statusLabel = '';
+                        if (item.running_balance > 0) statusLabel = 'DUE';
+                        else if (item.running_balance < 0) statusLabel = 'OVERPAID';
+                        else statusLabel = 'CLEARED';
+
                         return `
                             <tr>
                                 <td>
@@ -953,9 +957,7 @@
                                 <td style="text-align: right;">
                                     <div class="${balanceClass}" style="font-weight: 700; font-size: 0.9rem;">
                                         ${formatter.format(Math.abs(item.running_balance))}
-                                        <div style="font-size: 0.6rem; font-weight: 400; opacity: 0.6; margin-top: 2px;">
-                                            ${item.running_balance > 0 ? 'DUE' : 'OVERPAID'}
-                                        </div>
+                                        <div style="font-size: 0.6rem; font-weight: 400; opacity: 0.6; margin-top: 2px; color: ${item.running_balance === 0 ? '#10b981' : ''}">${statusLabel}</div>
                                     </div>
                                 </td>
                             </tr>
