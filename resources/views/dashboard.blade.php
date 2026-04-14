@@ -483,7 +483,7 @@
     </style>
 </head>
 <body>
-
+    @include('partials.auth')
     <div class="ambient-glow"></div>
     <div class="ambient-glow-2"></div>
 
