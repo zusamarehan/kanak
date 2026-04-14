@@ -742,7 +742,28 @@
             }
 
             .drawer-header {
-                padding: 1.25rem;
+                padding: 1.25rem 1.5rem !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+
+            .drawer-header h2 {
+                font-size: 1.25rem !important;
+            }
+
+            .drawer-header button {
+                width: 36px !important;
+                height: 36px !important;
+                background: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 50% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 1.4rem !important;
+                margin-top: -5px; /* Visual balance */
+                flex-shrink: 0;
             }
 
             .drawer-content {
