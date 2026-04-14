@@ -488,29 +488,45 @@
             }
 
             /* Responsive Top Bar */
-            .container > div:first-child {
+            .top-bar-mobile {
                 flex-direction: column !important;
                 align-items: flex-start !important;
                 gap: 1.25rem !important;
                 margin-bottom: 2rem !important;
-                padding-bottom: 0.5rem !important;
+                border-bottom: 1px solid var(--border-glow) !important;
+                padding-bottom: 0 !important;
             }
 
-            .container > div:first-child nav {
+            .top-bar-mobile .brand {
+                font-size: 1.4rem !important;
+                padding-bottom: 0.25rem !important;
+            }
+
+            .top-bar-mobile nav {
                 width: 100%;
                 gap: 1.25rem !important;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
-                padding-bottom: 0px;
+                margin-bottom: -1px;
             }
 
-            .container > div:first-child nav::-webkit-scrollbar { display: none; }
+            .top-bar-mobile nav::-webkit-scrollbar { display: none; }
 
-            .container > div:first-child nav a {
+            .top-bar-mobile nav a {
                 font-size: 0.75rem !important;
                 white-space: nowrap;
-                padding-bottom: 1rem !important;
+                padding-bottom: 0.75rem !important;
+                position: relative;
+            }
+
+            .top-bar-mobile nav a.active {
+                color: var(--text-main) !important;
+                border-bottom: 2px solid var(--accent-primary);
+            }
+
+            .top-bar-mobile nav a.active span {
+                display: none !important; /* Hide the old absolute span on mobile */
             }
 
             header {
@@ -583,6 +599,13 @@
                 background: transparent !important;
                 border-color: var(--border-glow) !important;
             }
+
+            /* Ensure Totals Section has no hover background change */
+            .table-container .total-row:hover td, 
+            .table-container .total-row:active td {
+                background: transparent !important;
+            }
+
             .stat-card::before { display: none !important; }
 
             button:hover, .view-btn:hover, 
@@ -659,41 +682,52 @@
                 content: none !important;
             }
 
-            /* Totals Section Enhancement */
+            /* Professional Totals Bar (Premium Look) */
             .table-container .total-row {
-                background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(0, 0, 0, 0)) !important;
+                background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                border-top: 2px solid var(--accent-primary) !important;
+                border-radius: 20px !important;
                 display: flex !important;
                 flex-direction: row !important;
-                flex-wrap: wrap;
-                justify-content: space-around !important;
-                padding: 1.5rem !important;
-                gap: 0.5rem;
-                box-shadow: none !important;
+                padding: 1.25rem 0 !important;
+                margin-top: 1.5rem !important;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
+                backdrop-filter: blur(10px) !important;
             }
 
             .table-container .total-row td {
-                width: calc(50% - 1rem) !important;
+                width: 50% !important;
+                flex-direction: column !important;
                 align-items: center !important;
-                text-align: center !important;
-                margin-bottom: 0 !important;
-                padding-bottom: 0 !important;
+                justify-content: center !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+
+            .table-container .total-row td:nth-child(2) {
+                border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
             }
 
             .table-container .total-row td:first-child {
-                width: 100% !important;
-                font-weight: 800;
-                letter-spacing: 0.1em;
-                color: #fff !important;
-                justify-content: center !important;
-                border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-                margin-bottom: 0.5rem;
-                padding-bottom: 0.5rem !important;
+                display: none !important;
             }
 
             .table-container .total-row td::before {
-                margin-bottom: 0.25rem;
+                font-size: 0.65rem !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.08em !important;
+                margin-bottom: 0.4rem !important;
+                opacity: 0.5 !important;
+                color: var(--text-muted) !important;
+            }
+
+            .table-container .total-row td span {
+                font-size: 1.1rem !important;
+                font-weight: 700 !important;
+                background: linear-gradient(to right, #fff, #a5b4fc) !important;
+                -webkit-background-clip: text !important;
+                -webkit-text-fill-color: transparent !important;
+                letter-spacing: -0.01em !important;
             }
 
             /* Action Button Enhancement */
@@ -786,11 +820,11 @@
     <div class="ambient-glow-2"></div>
 
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; border-bottom: 1px solid var(--border-glow);">
-            <div style="font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; background: linear-gradient(to right, #fff, var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding-bottom: 1rem; line-height: 1;">Kanak Foundation</div>
+        <div class="top-bar-mobile" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; border-bottom: 1px solid var(--border-glow);">
+            <div class="brand" style="font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; background: linear-gradient(to right, #fff, var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding-bottom: 1rem; line-height: 1;">Kanak Foundation</div>
             <nav style="display: flex; gap: 2rem;">
                 <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s; padding-bottom: 1rem; line-height: 1;">Financial Overview</a>
-                <a href="/donations" style="color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; position: relative; padding-bottom: 1rem; line-height: 1;">
+                <a href="/donations" class="active" style="color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; position: relative; padding-bottom: 1rem; line-height: 1;">
                     Donors
                     <span style="position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--accent-primary); box-shadow: 0 0 10px var(--accent-primary);"></span>
                 </a>
@@ -1055,7 +1089,7 @@
                             <tr class="total-row">
                                 <td data-label="Totals" style="text-align: right; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Totals</td>
                                 <td data-label="Total Count" style="font-weight: 700;">${sumCount} ${isZakat ? 'records' : 'donations'}</td>
-                                <td data-label="Total Amount"><span class="${pillClass}" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.1); font-weight: 700;">${formatter.format(sumAmount)}</span></td>
+                                <td data-label="Total Amount"><span class="${pillClass}" style="=color: #fff; border-color: rgba(255,255,255,0.1); font-weight: 700;">${formatter.format(sumAmount)}</span></td>
                                 <td style="display: none;"></td>
                             </tr>
                         `;
