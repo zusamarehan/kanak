@@ -480,6 +480,135 @@
             text-align: center;
             color: var(--text-muted);
         }
+
+        /* Mobile Optimization */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.25rem;
+            }
+
+            /* Responsive Top Bar */
+            .container > div:first-child {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 1.25rem !important;
+                margin-bottom: 2rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+
+            .container > div:first-child nav {
+                width: 100%;
+                gap: 1.25rem !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding-bottom: 0px;
+            }
+
+            .container > div:first-child nav::-webkit-scrollbar { display: none; }
+
+            .container > div:first-child nav a {
+                font-size: 0.75rem !important;
+                white-space: nowrap;
+                padding-bottom: 1rem !important;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .filter-group {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1rem;
+            }
+
+            .date-input {
+                width: 100%;
+            }
+
+            #date_range {
+                min-width: 100% !important;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 0.5rem;
+                margin-bottom: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .table-container {
+                border-radius: 16px;
+                margin-bottom: 2rem;
+            }
+
+            .table-header {
+                padding: 1.25rem;
+            }
+
+            .table-header h2 {
+                font-size: 1.1rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            th, td {
+                padding: 1rem 1.25rem;
+                white-space: nowrap;
+            }
+
+            /* Drawer Mobile */
+            .drawer {
+                width: 100% !important;
+                right: -100% !important;
+            }
+
+            .drawer.active {
+                right: 0 !important;
+            }
+
+            .drawer-header {
+                padding: 1.25rem;
+            }
+
+            .drawer-content {
+                padding: 1rem;
+            }
+            
+            .ledger-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
     </style>
 </head>
 <body>
