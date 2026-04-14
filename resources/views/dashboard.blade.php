@@ -575,15 +575,160 @@
                 align-items: flex-start;
             }
 
-            table {
-                display: block;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+            /* Disable Hover Effects on Mobile */
+            .stat-card:hover, .stat-card:active,
+            tbody tr:hover td, tbody tr:active td {
+                transform: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                border-color: var(--border-glow) !important;
+            }
+            .stat-card::before { display: none !important; }
+
+            button:hover, .view-btn:hover, 
+            button:active, .view-btn:active,
+            button, .view-btn {
+                transform: none !important;
+                box-shadow: none !important;
             }
 
-            th, td {
-                padding: 1rem 1.25rem;
-                white-space: nowrap;
+            /* Simplified Card Design (Less Noise) */
+            .table-container {
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                overflow: visible;
+            }
+
+            .table-container .table-header {
+                background: var(--bg-panel);
+                border: 1px solid var(--border-glow);
+                border-radius: 20px;
+                margin-bottom: 1rem;
+                padding: 1.25rem;
+            }
+
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody tr {
+                background: var(--bg-panel);
+                border: 1px solid var(--border-glow);
+                border-radius: 24px;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                backdrop-filter: blur(12px);
+                position: relative;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
+            }
+
+            td {
+                padding: 0.5rem 0 !important;
+                border: none !important; /* Remove internal border/HR lines */
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                font-size: 0.9rem !important;
+                white-space: normal !important;
+            }
+
+            td[data-label]::before {
+                content: attr(data-label);
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                font-weight: 600;
+                letter-spacing: 0.05rem;
+            }
+
+            td:first-child {
+                padding-top: 0 !important;
+                justify-content: flex-start !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; /* Subtler header line */
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.75rem !important;
+            }
+
+            td:first-child::before {
+                content: none !important;
+            }
+
+            /* Totals Section Enhancement */
+            .table-container .total-row {
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(0, 0, 0, 0)) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-top: 2px solid var(--accent-primary) !important;
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: wrap;
+                justify-content: space-around !important;
+                padding: 1.5rem !important;
+                gap: 0.5rem;
+                box-shadow: none !important;
+            }
+
+            .table-container .total-row td {
+                width: calc(50% - 1rem) !important;
+                align-items: center !important;
+                text-align: center !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+            }
+
+            .table-container .total-row td:first-child {
+                width: 100% !important;
+                font-weight: 800;
+                letter-spacing: 0.1em;
+                color: #fff !important;
+                justify-content: center !important;
+                border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+                margin-bottom: 0.5rem;
+                padding-bottom: 0.5rem !important;
+            }
+
+            .table-container .total-row td::before {
+                margin-bottom: 0.25rem;
+            }
+
+            /* Action Button Enhancement */
+            .table-container td[data-label="Action"] {
+                justify-content: center !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+                padding-top: 1.25rem !important;
+                margin-top: 0.5rem;
+            }
+
+            .table-container td[data-label="Action"]::before {
+                display: none !important;
+            }
+
+            .table-container .view-btn {
+                width: 100% !important;
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05)) !important;
+                border: 1px solid rgba(99, 102, 241, 0.3) !important;
+                color: #a5b4fc !important;
+                border-radius: 12px !important;
+                padding: 0.8rem !important;
+                height: auto !important;
+                font-size: 0.85rem !important;
+                font-weight: 600 !important;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                gap: 0.75rem;
+                margin-left: 0 !important;
+            }
+
+            .table-container .view-btn::after {
+                content: 'View Donor History';
             }
 
             /* Drawer Mobile */
@@ -604,9 +749,12 @@
                 padding: 1rem;
             }
             
-            .ledger-table {
-                display: block;
-                overflow-x: auto;
+            .ledger-table tr {
+                background: rgba(255, 255, 255, 0.01);
+                border: 1px solid var(--border-glow);
+                margin-bottom: 0.75rem;
+                border-radius: 12px;
+                padding: 1rem;
             }
         }
     </style>
@@ -867,15 +1015,15 @@
                                     <div class="${avatarClass}">${initials}</div>
                                     <strong>${donorName}</strong>
                                 </td>
-                                <td>
+                                <td data-label="Activity">
                                     <span style="opacity: 0.8">${donor.total_count} ${isZakat ? 'records' : 'donations'}</span>
                                 </td>
-                                <td>
+                                <td data-label="Total">
                                     <span class="${pillClass}">${formatter.format(donor.total_amount)}</span>
                                 </td>
-                                <td style="text-align: right;">
+                                <td data-label="Action" style="text-align: right;">
                                     <button class="view-btn" style="margin-left: auto;" onclick="openLedger(${donor.id}, '${escapedName}')" title="View Transaction History">
-                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                     </button>
                                 </td>
                             </tr>
@@ -884,10 +1032,10 @@
 
                         const footerHtml = `
                             <tr class="total-row">
-                                <td style="text-align: right; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Totals</td>
-                                <td style="font-weight: 700;">${sumCount} ${isZakat ? 'records' : 'donations'}</td>
-                                <td><span class="${pillClass}" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.1); font-weight: 700;">${formatter.format(sumAmount)}</span></td>
-                                <td></td>
+                                <td data-label="Totals" style="text-align: right; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Totals</td>
+                                <td data-label="Total Count" style="font-weight: 700;">${sumCount} ${isZakat ? 'records' : 'donations'}</td>
+                                <td data-label="Total Amount"><span class="${pillClass}" style="background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.1); font-weight: 700;">${formatter.format(sumAmount)}</span></td>
+                                <td style="display: none;"></td>
                             </tr>
                         `;
 
@@ -944,16 +1092,16 @@
                         
                         return `
                             <tr>
-                                <td>
+                                <td data-label="Date">
                                     <div style="font-size: 0.85rem; font-weight: 500;">${date}</div>
                                     <div style="font-size: 0.7rem; color: ${typeColor};">${item.type}</div>
                                 </td>
-                                <td>
+                                <td data-label="Description">
                                     <div style="font-weight: 500; font-size: 0.85rem;">${item.description}</div>
                                     <div style="font-size: 0.7rem; color: var(--text-muted);">${isZakat ? 'Direct Collection' : 'Monthly Contribution'}</div>
                                 </td>
-                                <td style="text-align: right;"><span style="color: ${amountColor}; font-weight: 600;">+ ${formatter.format(item.amount)}</span></td>
-                                <td style="text-align: right; font-weight: 700;">${formatter.format(balance)}</td>
+                                <td data-label="Amount" style="text-align: right;"><span style="color: ${amountColor}; font-weight: 600;">+ ${formatter.format(item.amount)}</span></td>
+                                <td data-label="Balance" style="text-align: right; font-weight: 700;">${formatter.format(balance)}</td>
                             </tr>
                         `;
                     }).join('');
