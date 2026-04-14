@@ -35,7 +35,8 @@
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             overflow-x: hidden;
         }
 
@@ -321,8 +322,8 @@
         <div class="top-bar">
             <div class="brand">Kanak Foundation</div>
             <nav>
-                <a href="/overview" class="active">Financial Overview</a>
-                <a href="/dashboard">Donors</a>
+                <a href="/" class="active">Financial Overview</a>
+                <a href="/donations">Donors</a>
                 <a href="/disbursements">Disbursements</a>
             </nav>
         </div>
@@ -419,6 +420,8 @@
             </div>
         </div>
     </div>
+
+    @include('partials.footer')
 
     <script>
         const formatter = new Intl.NumberFormat('en-IN', {

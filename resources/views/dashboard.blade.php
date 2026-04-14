@@ -33,7 +33,8 @@
             position: relative;
             overflow-x: hidden;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* Ambient Glow Backgrounds */
@@ -490,8 +491,8 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; border-bottom: 1px solid var(--border-glow);">
             <div style="font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; background: linear-gradient(to right, #fff, var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding-bottom: 1rem; line-height: 1;">Kanak Foundation</div>
             <nav style="display: flex; gap: 2rem;">
-                <a href="/overview" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s; padding-bottom: 1rem; line-height: 1;">Financial Overview</a>
-                <a href="/dashboard" style="color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; position: relative; padding-bottom: 1rem; line-height: 1;">
+                <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.3s; padding-bottom: 1rem; line-height: 1;">Financial Overview</a>
+                <a href="/donations" style="color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; position: relative; padding-bottom: 1rem; line-height: 1;">
                     Donors
                     <span style="position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--accent-primary); box-shadow: 0 0 10px var(--accent-primary);"></span>
                 </a>
@@ -580,6 +581,8 @@
             </table>
         </div>
     </div>
+
+    @include('partials.footer')
 
     <!-- Ledger Drawer -->
     <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
