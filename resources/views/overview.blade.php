@@ -313,6 +313,89 @@
             .hero-grid { grid-template-columns: 1fr; }
             header { flex-direction: column; align-items: flex-start; }
         }
+
+        /* Mobile Optimization */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.25rem;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.25rem;
+                margin-bottom: 2rem;
+                border-bottom: 1px solid var(--border-glow);
+            }
+
+            .brand {
+                font-size: 1.4rem;
+                padding-bottom: 0.25rem;
+            }
+
+            nav {
+                width: 100%;
+                gap: 1.25rem;
+                overflow-x: auto;
+                padding-bottom: 0.1rem;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            nav::-webkit-scrollbar { display: none; }
+
+            nav a {
+                font-size: 0.75rem;
+                white-space: nowrap;
+                padding-bottom: 0.75rem;
+            }
+
+            header {
+                margin-bottom: 2rem;
+                gap: 1rem;
+            }
+
+            .header-left h1 {
+                font-size: 1.8rem;
+            }
+
+            .header-left p {
+                font-size: 0.95rem;
+            }
+
+            .main-card {
+                padding: 1.75rem;
+                min-height: 180px;
+            }
+
+            .main-value {
+                font-size: 2.4rem;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
+                margin-bottom: 2.5rem;
+            }
+
+            .hero-grid {
+                gap: 1rem;
+                margin-bottom: 2.5rem;
+            }
+
+            .section-title {
+                margin-bottom: 1.25rem;
+                font-size: 0.75rem;
+            }
+            
+            .card {
+                padding: 1.25rem;
+            }
+
+            .card-value {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
