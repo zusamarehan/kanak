@@ -26,7 +26,8 @@ class DonorLedgerController extends Controller
             ->get()
             ->map(function ($item) {
 
-                $date = Carbon::parse($item->created_at);
+                // build real donation month date
+                $date = Carbon::createFromDate($item->year, $item->month, 1);
 
                 return [
                     'id' => $item->id,
