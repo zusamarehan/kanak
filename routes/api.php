@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\RecipientListController;
 use App\Http\Controllers\Api\RecipientLedgerController;
 use App\Http\Controllers\Api\DonorLedgerController;
 use App\Http\Controllers\Api\DonationEntryController;
+use App\Http\Controllers\Api\DisbursementEntryController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -24,4 +25,7 @@ Route::post('/donations', [DonationEntryController::class, 'store']);
 Route::get('/disbursement-stats', [DisbursementStatsController::class, 'index']);
 Route::get('/recipients', [RecipientListController::class, 'index']);
 Route::get('/recipients/{id}/ledger', [RecipientLedgerController::class, 'show']);
+
+Route::get('/recipients-list', [DisbursementEntryController::class, 'recipients']);
+Route::post('/disbursements', [DisbursementEntryController::class, 'store']);
 Route::get('/overview', [\App\Http\Controllers\Api\OverviewController::class, 'index']);

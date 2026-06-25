@@ -20,3 +20,7 @@ Route::get('/disburements', function () {
     return view('disbursements-dashboard');
 });
 
+Route::get('/disbursement-entry', function () {
+    return view('disbursement-entry');
+})->name('disbursement-entry');
+
