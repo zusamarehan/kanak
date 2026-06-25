@@ -11,6 +11,10 @@ Route::get('/disbursements', function () {
     return view('disbursements-dashboard');
 })->name('disbursements');
 
+Route::get('/donation-entry', function () {
+    return view('donation-entry');
+})->name('donation-entry');
+
 // Alias for typo support as requested
 Route::get('/disburements', function () {
     return view('disbursements-dashboard');

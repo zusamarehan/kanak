@@ -409,6 +409,7 @@
                 <a href="/" class="active">Financial Overview</a>
                 <a href="/donations">Donors</a>
                 <a href="/disbursements">Disbursements</a>
+                <a href="/donation-entry">Record Donation</a>
             </nav>
         </div>
 
