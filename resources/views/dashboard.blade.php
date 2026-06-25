@@ -1136,7 +1136,9 @@
                         .map(item => {
                             runningBalance += parseFloat(item.amount);
 
-                            const date = new Date(item.date).toLocaleDateString('en-IN', {
+                            const d = new Date(item.date + 'T00:00:00');
+                            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+                            const date = lastDay.toLocaleDateString('en-IN', {
                                 day: 'numeric',
                                 month: 'short',
                                 year: 'numeric'
