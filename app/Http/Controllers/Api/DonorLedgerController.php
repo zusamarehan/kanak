@@ -22,14 +22,12 @@ class DonorLedgerController extends Controller
             ->select('id', 'amount', 'month', 'year', 'created_at')
             ->get()
             ->map(function ($item) {
-                $date = "{$item->year}-" . str_pad($item->month, 2, '0', STR_PAD_LEFT) . "-01";
-
                 return [
                     'id' => $item->id,
                     'amount' => (float) $item->amount,
                     'type' => 'Donation',
-                    'date' => $date,
-                    'timestamp' => strtotime($date),
+                    'date' => $item->created_at->toDateString(),
+                    'timestamp' => strtotime($item->created_at),
                     'description' => 'Contribution',
                     'raw_date' => $item->created_at,
                 ];
@@ -45,8 +43,8 @@ class DonorLedgerController extends Controller
                     'id' => $item->id,
                     'amount' => (float) $item->amount,
                     'type' => 'Zakat',
-                    'date' => $item->collected_on,
-                    'timestamp' => strtotime($item->collected_on),
+                    'date' => $item->created_at->toDateString(),
+                    'timestamp' => strtotime($item->created_at),
                     'description' => 'Zakat Collection',
                     'raw_date' => $item->created_at,
                 ];
