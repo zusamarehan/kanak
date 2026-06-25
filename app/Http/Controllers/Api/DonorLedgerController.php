@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DonorLedgerController extends Controller
 {
@@ -13,7 +13,10 @@ class DonorLedgerController extends Controller
         $donor = DB::table('donors')->where('id', $id)->first();
 
         if (!$donor) {
-            return response()->json(['success' => false, 'message' => 'Donor not found'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Donor not found'
+            ], 404);
         }
 
         $donations = DB::table('donations')
@@ -22,12 +25,15 @@ class DonorLedgerController extends Controller
             ->select('id', 'amount', 'month', 'year', 'created_at')
             ->get()
             ->map(function ($item) {
+
+                $date = Carbon::parse($item->created_at);
+
                 return [
                     'id' => $item->id,
                     'amount' => (float) $item->amount,
                     'type' => 'Donation',
-                    'date' => $item->created_at->toDateString(),
-                    'timestamp' => strtotime($item->created_at),
+                    'date' => $date->toDateString(),
+                    'timestamp' => $date->timestamp,
                     'description' => 'Contribution',
                     'raw_date' => $item->created_at,
                 ];
@@ -39,12 +45,16 @@ class DonorLedgerController extends Controller
             ->select('id', 'amount', 'collected_on', 'created_at')
             ->get()
             ->map(function ($item) {
+
+                // IMPORTANT: use collected_on (actual business date), not created_at
+                $date = Carbon::parse($item->collected_on);
+
                 return [
                     'id' => $item->id,
                     'amount' => (float) $item->amount,
                     'type' => 'Zakat',
-                    'date' => $item->created_at->toDateString(),
-                    'timestamp' => strtotime($item->created_at),
+                    'date' => $date->toDateString(),
+                    'timestamp' => $date->timestamp,
                     'description' => 'Zakat Collection',
                     'raw_date' => $item->created_at,
                 ];
