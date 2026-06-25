@@ -48,7 +48,7 @@
             z-index: 0;
             pointer-events: none;
         }
-        
+
         .ambient-glow-2 {
             position: absolute;
             width: 40vw;
@@ -474,7 +474,7 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .empty-state {
             padding: 4rem 2rem;
             text-align: center;
@@ -601,14 +601,14 @@
             }
 
             /* Ensure Totals Section has no hover background change */
-            .table-container .total-row:hover td, 
+            .table-container .total-row:hover td,
             .table-container .total-row:active td {
                 background: transparent !important;
             }
 
             .stat-card::before { display: none !important; }
 
-            button:hover, .view-btn:hover, 
+            button:hover, .view-btn:hover,
             button:active, .view-btn:active,
             button, .view-btn {
                 transform: none !important;
@@ -803,7 +803,7 @@
             .drawer-content {
                 padding: 1rem;
             }
-            
+
             .ledger-table tr {
                 background: rgba(255, 255, 255, 0.01);
                 border: 1px solid var(--border-glow);
@@ -834,7 +834,7 @@
         </div>
         <header>
             <h1>Overview</h1>
-            
+
             <div class="filter-group">
                 <div class="date-input">
                     <label>Select Date Range</label>
@@ -859,7 +859,7 @@
                 <div class="stat-title">Total Zakat Collection</div>
                 <div class="stat-value" id="val-zakat" style="color: #ffd700;"><div class="skeleton"></div></div>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-icon icon-donations">#</div>
                 <div class="stat-title">All Transactions</div>
@@ -981,7 +981,7 @@
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
                 const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
                 const currentVal = start + (end - start) * easeOut;
-                
+
                 obj.innerHTML = formatCurrency ? formatter.format(currentVal) : Math.floor(currentVal);
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
@@ -1006,14 +1006,14 @@
             document.getElementById('val-zakat').innerHTML = '<div class="skeleton"></div>';
             document.getElementById('val-donations').innerHTML = '<div class="skeleton"></div>';
             document.getElementById('val-donors').innerHTML = '<div class="skeleton"></div>';
-            
+
             document.getElementById('donor-tbody').innerHTML = '<tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>';
             document.getElementById('zakat-tbody').innerHTML = '<tr><td colspan="4"><div class="skeleton" style="width: 100%"></div></td></tr>';
 
             const params = new URLSearchParams();
             if (startDate) params.append('start_date', startDate);
             if (endDate) params.append('end_date', endDate);
-            
+
             const queryString = params.toString() ? '?' + params.toString() : '';
 
             try {
@@ -1030,7 +1030,7 @@
                     const elZakat = document.getElementById('val-zakat');
                     const elDonations = document.getElementById('val-donations');
                     const elDonors = document.getElementById('val-donors');
-                    
+
                     animateValue(elAmount, 0, statsData.data.total_collected_amount, 1500, true);
                     animateValue(elZakat, 0, statsData.data.total_zakat_amount, 1500, true);
                     animateValue(elDonations, 0, statsData.data.total_donations_count + statsData.data.total_zakat_count, 1500, false);
@@ -1041,7 +1041,7 @@
                     const populateRoster = (elementId, data, category) => {
                         const tbody = document.getElementById(elementId);
                         const isZakat = category === 'zakat';
-                        
+
                         if (!data || data.length === 0) {
                             tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">No records found.</div></td></tr>`;
                             return;
@@ -1061,10 +1061,10 @@
                             const donorName = donor.name || 'Anonymous User';
                             const initials = donorName.substring(0, 2).toUpperCase();
                             const escapedName = donorName.replace(/'/g, "\\'");
-                            
+
                             sumCount += parseInt(donor.total_count || 0);
                             sumAmount += parseFloat(donor.total_amount || 0);
-                            
+
                             return `
                             <tr>
                                 <td>
@@ -1118,7 +1118,7 @@
             tbody.innerHTML = '';
             loading.style.display = 'block';
             container.style.display = 'none';
-            
+
             drawer.classList.add('active');
             overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1129,38 +1129,53 @@
 
                 if (data.success) {
                     let runningBalance = 0;
-                    // Sort by year/month ascending for running balance calculation if needed, 
-                    // but usually donors just want to see a list.
-                    // Let's calculate running balance from oldest to newest.
-                    const ledgerData = [...data.data.ledger].reverse();
 
-                    tbody.innerHTML = data.data.ledger.map((item, index) => {
-                        // For the UI, we'll calculate running balance in reverse for the display if it's Desc
-                        const reversedIndex = data.data.ledger.length - 1 - index;
-                        let balance = 0;
-                        for(let i=0; i<=reversedIndex; i++) balance += parseFloat(ledgerData[i].amount);
+                    const rows = [...data.data.ledger]
+                        .slice()
+                        .reverse()
+                        .map(item => {
+                            runningBalance += parseFloat(item.amount);
 
-                        const dateStr = item.date;
-                        const date = new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-                        const isZakat = item.type === 'Zakat';
-                        const typeColor = isZakat ? '#ffd700' : 'var(--text-muted)';
-                        const amountColor = isZakat ? '#ffd700' : 'var(--accent-glow)';
-                        
-                        return `
-                            <tr>
-                                <td data-label="Date">
-                                    <div style="font-size: 0.85rem; font-weight: 500;">${date}</div>
-                                    <div style="font-size: 0.7rem; color: ${typeColor};">${item.type}</div>
-                                </td>
-                                <td data-label="Description">
-                                    <div style="font-weight: 500; font-size: 0.85rem;">${item.description}</div>
-                                    <div style="font-size: 0.7rem; color: var(--text-muted);">${isZakat ? 'Direct Collection' : 'Monthly Contribution'}</div>
-                                </td>
-                                <td data-label="Amount" style="text-align: right;"><span style="color: ${amountColor}; font-weight: 600;">+ ${formatter.format(item.amount)}</span></td>
-                                <td data-label="Balance" style="text-align: right; font-weight: 700;">${formatter.format(balance)}</td>
-                            </tr>
-                        `;
-                    }).join('');
+                            const date = new Date(item.date).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                            });
+
+                            const isZakat = item.type === 'Zakat';
+
+                            return {
+                                html: `
+                <tr>
+                    <td data-label="Date">
+                        <div style="font-size: 0.85rem; font-weight: 500;">${date}</div>
+                        <div style="font-size: 0.7rem; color: ${isZakat ? '#ffd700' : 'var(--text-muted)'};">
+                            ${item.type}
+                        </div>
+                    </td>
+                    <td data-label="Description">
+                        <div style="font-weight: 500; font-size: 0.85rem;">${item.description}</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">
+                            ${isZakat ? 'Direct Collection' : 'Monthly Contribution'}
+                        </div>
+                    </td>
+                    <td data-label="Amount" style="text-align: right;">
+                        <span style="color: ${isZakat ? '#ffd700' : 'var(--accent-glow)'};">
+                            + ${formatter.format(item.amount)}
+                        </span>
+                    </td>
+                    <td data-label="Balance" style="text-align: right; font-weight: 700;">
+                        ${formatter.format(runningBalance)}
+                    </td>
+                </tr>
+            `
+                            };
+                        })
+                        .reverse()
+                        .map(r => r.html)
+                        .join('');
+
+                    tbody.innerHTML = rows;
                 }
             } catch (err) {
                 console.error('Failed to fetch ledger', err);
