@@ -19,42 +19,44 @@ class DonorLedgerController extends Controller
             ], 404);
         }
 
+        // Donations
         $donations = DB::table('donations')
             ->where('donor_id', $id)
             ->where('amount', '>', 0)
-            ->select('id', 'amount', 'month', 'year', 'created_at')
+            ->select('id', 'amount', 'created_at')
             ->get()
             ->map(function ($item) {
-
-                // build real donation month date
-                $date = Carbon::createFromDate($item->year, $item->month, 1);
+                $date = Carbon::parse($item->created_at);
 
                 return [
                     'id' => $item->id,
                     'amount' => (float) $item->amount,
                     'type' => 'Donation',
-                    'date' => $date->toDateString(),
+                    'date' => $date->format('Y-m-d'),
+                    'month' => $date->format('F'),
+                    'year' => $date->format('Y'),
                     'timestamp' => $date->timestamp,
                     'description' => 'Contribution',
                     'raw_date' => $item->created_at,
                 ];
             });
 
+        // Zakat
         $zakat = DB::table('zakat_collections')
             ->where('donor_id', $id)
             ->where('amount', '>', 0)
-            ->select('id', 'amount', 'collected_on', 'created_at')
+            ->select('id', 'amount', 'created_at')
             ->get()
             ->map(function ($item) {
-
-                // IMPORTANT: use collected_on (actual business date), not created_at
-                $date = Carbon::parse($item->collected_on);
+                $date = Carbon::parse($item->created_at);
 
                 return [
                     'id' => $item->id,
                     'amount' => (float) $item->amount,
                     'type' => 'Zakat',
-                    'date' => $date->toDateString(),
+                    'date' => $date->format('Y-m-d'),
+                    'month' => $date->format('F'),
+                    'year' => $date->format('Y'),
                     'timestamp' => $date->timestamp,
                     'description' => 'Zakat Collection',
                     'raw_date' => $item->created_at,
@@ -63,7 +65,7 @@ class DonorLedgerController extends Controller
 
         $ledger = $donations
             ->concat($zakat)
-            ->sortByDesc('timestamp')
+            ->sortBy('timestamp')   // important
             ->values();
 
         return response()->json([
