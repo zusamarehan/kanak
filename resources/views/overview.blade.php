@@ -405,12 +405,7 @@
     <div class="container">
         <div class="top-bar">
             <div class="brand">Kanak Foundation</div>
-            <nav>
-                <a href="/" class="active">Financial Overview</a>
-                <a href="/donations">Donors</a>
-                <a href="/disbursements">Disbursements</a>
-                <a href="/donation-entry">Record Donation</a>
-            </nav>
+            @include('partials.nav')
         </div>
 
         <header>
