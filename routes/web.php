@@ -24,3 +24,7 @@ Route::get('/disbursement-entry', function () {
     return view('disbursement-entry');
 })->name('disbursement-entry');
 
+Route::get('/repayment-entry', function () {
+    return view('repayment-entry');
+})->name('repayment-entry');
+
