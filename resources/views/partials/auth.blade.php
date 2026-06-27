@@ -1,9 +1,11 @@
 <script>
     (function() {
         const STORAGE_KEY = 'kanak_foundation_auth';
-        const PASSWORD = 'Kanak!@Founded';
+        const PASSWORD_VIEWER = 'Kanak!@Founded';
+        const PASSWORD_ADMIN = 'Kanak!@Admin';
 
-        if (sessionStorage.getItem(STORAGE_KEY) === 'true') {
+        const role = sessionStorage.getItem(STORAGE_KEY);
+        if (role === 'viewer' || role === 'admin') {
             return;
         }
 
@@ -17,8 +19,10 @@
                 return;
             }
 
-            if (password === PASSWORD) {
-                sessionStorage.setItem(STORAGE_KEY, 'true');
+            if (password === PASSWORD_VIEWER) {
+                sessionStorage.setItem(STORAGE_KEY, 'viewer');
+            } else if (password === PASSWORD_ADMIN) {
+                sessionStorage.setItem(STORAGE_KEY, 'admin');
             } else {
                 alert("Incorrect password.");
                 authenticate();

@@ -117,6 +117,13 @@
     document.addEventListener('DOMContentLoaded', function() {
         const toggle = document.querySelector('.kanak-dropdown-toggle');
         const menu = document.querySelector('.kanak-dropdown-menu');
+        const dropdownContainer = document.querySelector('.kanak-dropdown');
+        
+        // Hide Create dropdown if user is not admin
+        const role = sessionStorage.getItem('kanak_foundation_auth');
+        if (role !== 'admin' && dropdownContainer) {
+            dropdownContainer.style.display = 'none';
+        }
         
         if (toggle && menu) {
             toggle.addEventListener('click', function(e) {
